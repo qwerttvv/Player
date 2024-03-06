@@ -1,0 +1,66 @@
+name: Build VideoRenderer
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Show system
+        run: |
+          Get-WmiObject -Class Win32_Processor
+          systeminfo
+        shell: pwsh
+      
+      - name: Get latest commit SHA for VideoRenderer and Prepare Release Notes
+        shell: pwsh
+        run: |
+          $SHA_VIDEORENDERER = (curl -sSL https://api.github.com/repos/Aleksoid1978/VideoRenderer/commits/master | jq -r '.sha')
+          echo "SHA_VIDEORENDERER=$SHA_VIDEORENDERER" >> $env:GITHUB_ENV
+          echo "What's new for this nightly builds" > "${{ github.workspace }}-nightly_builds_release_notes.txt"
+          echo "https://github.com/Aleksoid1978/VideoRenderer/commits/$SHA_VIDEORENDERER" >> "${{ github.workspace }}-nightly_builds_release_notes.txt"
+          echo "" >> "${{ github.workspace }}-nightly_builds_release_notes.txt"
+          echo "Enjoy ：）" >> "${{ github.workspace }}-nightly_builds_release_notes.txt"
+
+      - name: checkout VideoRenderer
+        uses: actions/checkout@main
+        with:
+          repository: Aleksoid1978/VideoRenderer
+          ref: master
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: TimeZone
+        shell: pwsh
+        run: tzutil /s "China Standard Time"
+
+      - name: Build VideoRenderer
+        run: |
+          cd D:\\a\\Player\\Player
+          .\\build_mpcvr.cmd NoWait
+        shell: pwsh
+        continue-on-error: true
+
+      - name: Upload logs to artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "MPC-VideoRenderer.LOGS" 
+          path: D:/a/Player/Player/_bin/logs/
+        continue-on-error: true
+
+      - name: Generate release tag
+        run: echo "tag=$(date +"%Y.%m.%d-%H.%M_VideoRenderer")" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Release
+        uses: softprops/action-gh-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.tag }}
+          files: |
+            D:/a/Player/Player/_bin/MpcVideoRenderer*.zip
+          body_path: ${{ github.workspace }}-nightly_builds_release_notes.txt
+        continue-on-error: true

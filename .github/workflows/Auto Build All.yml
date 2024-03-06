@@ -1,0 +1,183 @@
+name: Auto Build All
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */1 * * *'
+
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+
+    outputs:
+      trigger_build: ${{ steps.compare_shas.outputs.trigger_build }}
+
+    steps:
+      - name: Show system
+        run: |
+          echo -e "Total CPU cores\t: $(nproc)"
+          cat /proc/cpuinfo
+          cat /proc/meminfo
+
+      - name: Get MPC-BE commit SHA
+        run: |
+          MPCBE_COMMIT_SHA=$(curl -sSL https://api.github.com/repos/Aleksoid1978/MPC-BE/commits/master | jq -r '.sha')
+          echo "MPCBE_COMMIT_SHA=$MPCBE_COMMIT_SHA" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Get VideoRenderer commit SHA
+        run: |
+          VIDEORENDERER_COMMIT_SHA=$(curl -sSL https://api.github.com/repos/Aleksoid1978/VideoRenderer/commits/master | jq -r '.sha')
+          echo "VIDEORENDERER_COMMIT_SHA=$VIDEORENDERER_COMMIT_SHA" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Get Player latest release SHAs
+        run: |
+          PLAYER_RELEASE_BODY=$(curl -sSL https://api.github.com/repos/qwerttvv/Player/releases/latest | jq -r '.body')
+          MPCBE_RELEASE_SHA=$(echo "$PLAYER_RELEASE_BODY" | grep -oP 'https://github.com/Aleksoid1978/MPC-BE/commits/\K\w+')
+          VIDEORENDERER_RELEASE_SHA=$(echo "$PLAYER_RELEASE_BODY" | grep -oP 'https://github.com/Aleksoid1978/VideoRenderer/commits/\K\w+')
+          echo "MPCBE_RELEASE_SHA=$MPCBE_RELEASE_SHA" >> $GITHUB_ENV
+          echo "VIDEORENDERER_RELEASE_SHA=$VIDEORENDERER_RELEASE_SHA" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Compare Commit SHAs and Release SHAs
+        id: compare_shas
+        run: |
+          if [[ "$MPCBE_COMMIT_SHA" != "$MPCBE_RELEASE_SHA" || "$VIDEORENDERER_COMMIT_SHA" != "$VIDEORENDERER_RELEASE_SHA" ]]; then
+            echo "MPC-BE or VideoRenderer has a new commit. Triggering the build job."
+            trigger_build=true
+          else
+            echo "No new commits in MPC-BE or VideoRenderer. Stopping the workflow."
+            trigger_build=false
+          fi
+          echo "trigger_build=$trigger_build" >> $GITHUB_OUTPUT
+        shell: bash
+
+  build:
+    runs-on: windows-latest
+    needs: check-updates
+    if: needs.check-updates.outputs.trigger_build == 'true'
+
+    steps:
+      - name: Show system
+        run: |
+          Get-WmiObject -Class Win32_Processor
+          systeminfo
+        shell: pwsh
+
+      - name: Get latest commit SHA for MPC-BE and Prepare Release Notes
+        shell: pwsh
+        run: |
+          $SHA_MPC_BE = (curl -sSL https://api.github.com/repos/Aleksoid1978/MPC-BE/commits/master | jq -r '.sha')
+          echo "SHA_MPC_BE=$SHA_MPC_BE" >> $env:GITHUB_ENV
+          echo "What's new for this nightly builds" > "${{ github.workspace }}-nightly_builds_release_notes.txt"
+          echo "https://github.com/Aleksoid1978/MPC-BE/commits/$SHA_MPC_BE" >> "${{ github.workspace }}-nightly_builds_release_notes.txt"
+
+      - name: Clone MPC-BE repository
+        run: |
+          git clone --recursive https://github.com/Aleksoid1978/MPC-BE.git C:\\repos\\MPC-BE
+        shell: pwsh
+
+      - name: Get latest commit SHA for VideoRenderer and Prepare Release Notes
+        shell: pwsh
+        run: |
+          $SHA_VIDEORENDERER = (curl -sSL https://api.github.com/repos/Aleksoid1978/VideoRenderer/commits/master | jq -r '.sha')
+          echo "SHA_VIDEORENDERER=$SHA_VIDEORENDERER" >> $env:GITHUB_ENV
+          echo "https://github.com/Aleksoid1978/VideoRenderer/commits/$SHA_VIDEORENDERER" >> "${{ github.workspace }}-nightly_builds_release_notes.txt"
+          echo "" >> "${{ github.workspace }}-nightly_builds_release_notes.txt"
+          echo "Enjoy ：）" >> "${{ github.workspace }}-nightly_builds_release_notes.txt"
+
+      - name: Checkout VideoRenderer code
+        uses: actions/checkout@main
+        with:
+          repository: Aleksoid1978/VideoRenderer
+          ref: master
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up MSYS
+        run: |
+          curl -sSL https://github.com/Aleksoid1978/MSYS/raw/main/MSYS_MinGW-w64_GCC_1320_x86-x64.7z -o MSYS_MinGW-w64_GCC_1320_x86-x64.7z
+          7z x MSYS_MinGW-w64_GCC_1320_x86-x64.7z -oC:\\MSYS
+        shell: pwsh
+
+      - name: Create environments.bat
+        run: |
+          echo '@ECHO OFF' > C:\\repos\\MPC-BE\\environments.bat
+          echo 'SET "MPCBE_MSYS=C:\\MSYS"' >> C:\\repos\\MPC-BE\\environments.bat
+          echo 'SET "MPCBE_MINGW=C:\\MSYS\\mingw"' >> C:\\repos\\MPC-BE\\environments.bat
+        shell: pwsh
+
+      - name: Execute update_gcc.bat
+        run: |
+          cd C:\\repos\\MPC-BE
+          .\\update_gcc.bat
+        shell: pwsh
+
+      - name: TimeZone
+        shell: pwsh
+        run: tzutil /s "China Standard Time"
+
+      - name: Build VideoRenderer
+        run: |
+          cd D:\\a\\Player\\Player
+          dir
+          .\\build_mpcvr.cmd NoWait
+        shell: pwsh
+        continue-on-error: true
+
+      - name: Build MPC-BE
+        run: |
+          cd C:\\repos\\MPC-BE
+          .\\build.bat Build Packages
+        shell: pwsh
+        continue-on-error: true
+
+      - name: Upload MPC-BE logs to artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "MPC-BE.LOGS"
+          path: C:/repos/MPC-BE/_bin/logs/
+        continue-on-error: true
+
+      - name: Upload VideoRenderer logs to artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "MPC-VideoRenderer.LOGS"
+          path: D:/a/Player/Player/_bin/logs/
+        continue-on-error: true
+
+      - name: Generate release tag
+        run: echo "tag=$(date +"%Y.%m.%d-%H.%M_All")" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Release All
+        uses: softprops/action-gh-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          prerelease: true
+          tag_name: ${{ env.tag }}
+          files: |
+            C:/repos/MPC-BE/_bin/Packages/**/*.*
+            D:/a/Player/Player/_bin/MpcVideoRenderer*.zip
+          body_path: ${{ github.workspace }}-nightly_builds_release_notes.txt
+        continue-on-error: true
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@main
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 90
+          keep_minimum_runs: 33
+        continue-on-error: true
+
+      - name: Remove old Releases
+        uses: dev-drprasad/delete-older-releases@master
+        with:
+          keep_latest: 99
+          delete_tags: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
