@@ -2,12 +2,18 @@ name: Auto Build All
 
 on:
   workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build without checking updates(true/false)'
+        required: false
+        default: 'false'
   schedule:
     - cron: '0 */1 * * *'
 
 jobs:
   check-updates:
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.force_build == 'false' }}
 
     outputs:
       trigger_build: ${{ steps.compare_shas.outputs.trigger_build }}
@@ -56,7 +62,7 @@ jobs:
   build:
     runs-on: windows-latest
     needs: check-updates
-    if: needs.check-updates.outputs.trigger_build == 'true'
+    if: always() && (needs.check-updates.outputs.trigger_build == 'true' || github.event.inputs.force_build == 'true')
 
     steps:
       - name: Show system
