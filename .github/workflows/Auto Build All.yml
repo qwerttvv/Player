@@ -9,7 +9,7 @@ on:
         default: 'false'
   schedule:
     #- cron: '0 */1 * * *'
-    - cron: '* * * * *'
+    - cron: '*/5 * * * *'
 
 jobs:
   check-updates:
