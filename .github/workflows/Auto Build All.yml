@@ -8,12 +8,13 @@ on:
         required: false
         default: 'false'
   schedule:
-    - cron: '0 */1 * * *'
+    #- cron: '0 */1 * * *'
+    - cron: '* * * * *'
 
 jobs:
   check-updates:
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.force_build == 'false' }}
+    if: ${{ github.event.inputs.force_build != 'true' }}
 
     outputs:
       trigger_build: ${{ steps.compare_shas.outputs.trigger_build }}
