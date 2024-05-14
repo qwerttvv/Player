@@ -60,16 +60,17 @@ jobs:
         shell: bash
 
   build:
+    # runs-on: windows-latest
     runs-on: windows-2019
     needs: check-updates
     if: always() && (needs.check-updates.outputs.trigger_build == 'true' || github.event.inputs.force_build == 'true')
 
     steps:
-      - name: Show system
-        run: |
-          Get-WmiObject -Class Win32_Processor
-          systeminfo
-        shell: pwsh
+      # - name: Show system
+        # run: |
+          # Get-WmiObject -Class Win32_Processor
+          # systeminfo
+        # shell: pwsh
 
       - name: Get latest commit SHA for MPC-BE and Prepare Release Notes
         shell: pwsh
