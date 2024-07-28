@@ -135,6 +135,7 @@ jobs:
       - name: Build MPC-BE
         run: |
           cd C:\\repos\\MPC-BE
+          .\\build.bat Clean All NoWait
           .\\build.bat Build All Packages NoWait
         shell: pwsh
         continue-on-error: true
