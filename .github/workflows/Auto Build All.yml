@@ -103,8 +103,8 @@ jobs:
 
       - name: Set up MSYS
         run: |
-          curl -sSL https://github.com/Aleksoid1978/MSYS/raw/main/MSYS_MinGW-w64_GCC_1320_x86-x64.7z -o MSYS_MinGW-w64_GCC_1320_x86-x64.7z
-          7z x MSYS_MinGW-w64_GCC_1320_x86-x64.7z -oC:\\MSYS
+          curl -sSL https://raw.githubusercontent.com/Aleksoid1978/MSYS/refs/heads/main/MSYS_MinGW-w64_GCC_1421_x86-x64.7z -o MSYS_MinGW-w64_GCC_1421_x86-x64.7z
+          7z x MSYS_MinGW-w64_GCC_1421_x86-x64.7z -oC:\\MSYS
         shell: pwsh
 
       - name: Create environments.bat
