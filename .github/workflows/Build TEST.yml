@@ -22,15 +22,37 @@ jobs:
           git clone --recursive https://github.com/Aleksoid1978/MPC-BE.git D:\\MPC-BE
 
       - name: Select Windows SDK 10.0.22621.0
+        if: matrix.arch == 'windows-2019'
         run: |
           cd D:\\MPC-BE
           (Get-Content .\\src\\platform.props) | ForEach-Object { $_ -replace ">10.0<", ">10.0.22621.0<" } | Set-Content .\\src\\platform.props
+        shell: pwsh
+
+      - name: Select Windows SDK 10.0.26100.0
+        if: matrix.arch != 'windows-2019'
+        run: |
+          cd D:\\MPC-BE
+          (Get-Content .\\src\\platform.props) | ForEach-Object { $_ -replace ">10.0<", ">10.0.26100.0<" } | Set-Content .\\src\\platform.props
         shell: pwsh
 
       - name: Clone VideoRenderer repository
         shell: pwsh
         run: |
           git clone --recursive https://github.com/Aleksoid1978/VideoRenderer.git D:\\VideoRenderer
+
+      - name: Select Windows SDK 10.0.22621.0
+        if: matrix.arch == 'windows-2019'
+        run: |
+          cd D:\\VideoRenderer
+          (Get-Content .\\platform.props) | ForEach-Object { $_ -replace ">10.0<", ">10.0.22621.0<" } | Set-Content .\\platform.props
+        shell: pwsh
+
+      - name: Select Windows SDK 10.0.26100.0
+        if: matrix.arch != 'windows-2019'
+        run: |
+          cd D:\\VideoRenderer
+          (Get-Content .\\platform.props) | ForEach-Object { $_ -replace ">10.0<", ">10.0.22621.0<" } | Set-Content .\\platform.props
+        shell: pwsh
 
       - name: Set up MSYS
         shell: pwsh
@@ -50,6 +72,13 @@ jobs:
         run: |
           cd D:\\MPC-BE
           .\\update_gcc.bat
+
+      - name: Install InnoSetup - windows-2025
+        if: matrix.arch == 'windows-2025'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile D:\\is.exe
+          Start-Process -FilePath D:\\is.exe -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/SP-" -Wait
 
       - name: Build VideoRenderer
         shell: pwsh
