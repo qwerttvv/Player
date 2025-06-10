@@ -10,7 +10,6 @@ jobs:
     strategy:
       matrix:
         os:
-          - windows-2019
           - windows-2022
           - windows-2025
     
@@ -70,21 +69,25 @@ jobs:
         with:
           name: "MPC-BE.LOGS-${{ matrix.os }}"
           path: D:/MPC-BE/_bin/logs/
+          compression-level: 9
 
       - name: Upload VideoRenderer logs to artifact
         uses: actions/upload-artifact@main
         with:
           name: "MPC-VideoRenderer.LOGS-${{ matrix.os }}"
           path: D:/VideoRenderer/_bin/logs/
+          compression-level: 9
 
       - name: Upload MPC-BE bin to artifact
         uses: actions/upload-artifact@main
         with:
           name: "MPC-BE.BIN-${{ matrix.os }}"
           path: D:/MPC-BE/_bin/Packages/**/*.*
+          compression-level: 9
 
       - name: Upload VideoRenderer bin to artifact
         uses: actions/upload-artifact@main
         with:
           name: "MPC-VideoRenderer.BIN-${{ matrix.os }}"
           path: D:/VideoRenderer/_bin/MpcVideoRenderer*.zip
+          compression-level: 9
