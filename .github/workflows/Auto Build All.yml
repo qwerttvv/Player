@@ -160,6 +160,7 @@ jobs:
         with:
           name: "MPC-BE.LOGS"
           path: D:/MPC-BE/_bin/logs/
+          compression-level: 9
         continue-on-error: true
 
       - name: Upload VideoRenderer logs to artifact
@@ -167,6 +168,7 @@ jobs:
         with:
           name: "MPC-VideoRenderer.LOGS"
           path: D:/VideoRenderer/_bin/logs/
+          compression-level: 9
         continue-on-error: true
 
       - name: Generate release tag
@@ -174,7 +176,7 @@ jobs:
         run: echo "tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_ENV
 
       - name: Release All
-        uses: softprops/action-gh-release@master
+        uses: softprops/action-gh-release@37fd9d0351a2df198244c8ef9f56d02d1f921e20
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
