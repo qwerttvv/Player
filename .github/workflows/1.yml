@@ -1,0 +1,131 @@
+name: Repo-Clean
+
+on:
+  workflow_dispatch:
+    inputs:
+      delete_actions_caches:
+        description: 'Delete Actions Caches? (yes/no)'
+        required: true
+        default: 'no'
+      delete_commit_history:
+        description: 'Delete commit history? (yes/no)'
+        required: true
+        default: 'no'
+      delete_runs_and_releases:
+        description: 'Delete releases and workflow runs? (yes/no)'
+        required: true
+        default: 'no'
+      releases_keep_latest:
+        description: "How many latest releases to keep. (0 = none, false = skip)"
+        required: false
+        default: "0"
+        type: choice
+        options:
+          - false
+          - 0
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
+          - 7
+          - 8
+          - 9
+          - 10
+          - 20
+          - 30
+      workflows_keep_day:
+        description: "Days to keep workflows. (0 = none, false = skip)"
+        required: false
+        default: "0"
+        type: choice
+        options:
+          - false
+          - 0
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
+          - 7
+          - 8
+          - 9
+          - 10
+          - 20
+          - 30
+      delete_tags:
+        description: "Delete related Tags?"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - true
+          - false
+      prerelease_option:
+        description: "Whether to differentiate pre-release."
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - true
+          - false
+      releases_keep_keyword:
+        description: "Keyword of the keep releases."
+        required: false
+        default: "Backup/backup/BACKUP"
+      workflows_keep_keyword:
+        description: "keywords for keep workflows."
+        required: false
+        default: ""
+      out_log:
+        description: "Output detailed JSON logs."
+        required: false
+        default: false
+        type: boolean
+
+env:
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@main
+
+    - name: Setup Git
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
+
+    - name: Delete Actions Caches
+      if: contains('yes.YES.Yes', inputs.delete_actions_caches)
+      run: gh cache delete --all --succeed-on-no-caches
+
+    - name: Delete commit history
+      if: contains('yes.YES.Yes', inputs.delete_commit_history)
+      run: |
+        random_branch=$(uuidgen)
+        git checkout --orphan $random_branch
+        git commit --allow-empty -m "Initial commit"
+        git branch -M release
+        git push -f origin release
+
+    - name: Delete releases and workflows runs
+      if: contains('yes.YES.Yes', inputs.delete_runs_and_releases)
+      uses: ophub/delete-releases-workflows@main
+      with:
+        delete_releases: ${{ inputs.releases_keep_latest != 'false' }}
+        delete_tags: ${{ inputs.delete_tags }}
+        prerelease_option: ${{ inputs.prerelease_option }}
+        releases_keep_latest: ${{ inputs.releases_keep_latest }}
+        releases_keep_keyword: ${{ inputs.releases_keep_keyword }}
+        delete_workflows: ${{ inputs.workflows_keep_day != 'false' }}
+        workflows_keep_day: ${{ inputs.workflows_keep_day }}
+        workflows_keep_keyword: ${{ inputs.workflows_keep_keyword }}
+        out_log: ${{ inputs.out_log }}
+        gh_token: ${{ secrets.GITHUB_TOKEN }}
