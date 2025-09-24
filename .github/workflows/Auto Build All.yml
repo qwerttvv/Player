@@ -174,8 +174,8 @@ jobs:
             C:/repo/VideoRenderer/_bin/MpcVideoRenderer*.zip
           body_path: ${{ github.workspace }}-nightly_builds_release_notes.txt
 
-      - name: Checkout repository
-        uses: actions/checkout@main
+      # - name: Checkout repository
+        # uses: actions/checkout@main
 
       - name: rename and move pkg
         shell: pwsh
