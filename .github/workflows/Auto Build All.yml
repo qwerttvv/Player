@@ -204,8 +204,7 @@ jobs:
         shell: bash
         run: |
           default_branch=${{ github.event.repository.default_branch }}
-          random_branch=$(uuidgen)
-          git checkout --orphan $random_branch
+          git checkout --orphan temp_branch
           git commit --allow-empty -m "Initial commit"
           git branch -M $default_branch
           git push -f origin $default_branch
