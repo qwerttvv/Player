@@ -201,6 +201,7 @@ jobs:
             MpcVideoRenderer.zip
 
       - name: Delete commit history
+        shell: bash
         run: |
           default_branch=${{ github.event.repository.default_branch }}
           random_branch=$(uuidgen)
