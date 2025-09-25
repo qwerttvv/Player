@@ -212,7 +212,8 @@ jobs:
       - name: Delete releases and workflows runs
         uses: ophub/delete-releases-workflows@main
         with:
-          delete_releases: false
+          delete_releases: true
+          releases_keep_latest: 222
           delete_workflows: true
           workflows_keep_day: 22
           gh_token: ${{ secrets.GITHUB_TOKEN }}
