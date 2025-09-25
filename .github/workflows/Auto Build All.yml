@@ -184,7 +184,7 @@ jobs:
           Copy-Item 'MPC-BE.*.x64-installer.zip' '${{ github.workspace }}\MPC-BE.x64-installer.zip' -Force
           Copy-Item 'MPC-BE.*.x86-installer.zip' '${{ github.workspace }}\MPC-BE.x86-installer.zip' -Force
           Copy-Item 'MPC-BE.*.x64.7z' '${{ github.workspace }}\MPC-BE.x64.7z' -Force
-          Copy-Item 'MPC-BE.*.x86.7z' '${{ github.workspace }}\MPC-BE.x64.7z' -Force
+          Copy-Item 'MPC-BE.*.x86.7z' '${{ github.workspace }}\MPC-BE.x86.7z' -Force
           Copy-Item 'standalone_filters-mpc-be.*.x64.7z' '${{ github.workspace }}\standalone_filters-mpc-be.x64.7z' -Force
           Copy-Item 'standalone_filters-mpc-be.*.x86.7z' '${{ github.workspace }}\standalone_filters-mpc-be.x86.7z' -Force
           Set-Location "C:\repo\VideoRenderer\_bin\"
@@ -194,8 +194,18 @@ jobs:
         uses: EndBug/add-and-commit@main
         with:
           default_author: github_actions
-          message: "the latest nightly build"
+          message: "Initial commit"
           add: |
             MPC-BE.x*
             standalone_filters-mpc-be.x*
             MpcVideoRenderer.zip
+
+      - name: Delete commit history
+        if: contains('yes.YES.Yes', inputs.delete_commit_history)
+        run: |
+          default_branch=${{ github.event.repository.default_branch }}
+          random_branch=$(uuidgen)
+          git checkout --orphan $random_branch
+          git commit --allow-empty -m "Initial commit"
+          git branch -M $default_branch
+          git push -f origin $default_branch
