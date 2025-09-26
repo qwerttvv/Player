@@ -8,7 +8,7 @@ on:
         required: false
         default: 'false'
   schedule:
-    - cron: '11 * * * *'
+    - cron: '22 */2 * * *'
 
 jobs:
   check-updates:
