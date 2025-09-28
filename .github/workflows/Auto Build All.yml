@@ -194,7 +194,7 @@ jobs:
         uses: EndBug/add-and-commit@main
         with:
           default_author: github_actions
-          message: "Initial commit"
+          message: "🤘🤘🤘🤘🤘🤘"
           add: |
             - MPC-BE.x*
             - standalone_filters-mpc-be.x*
