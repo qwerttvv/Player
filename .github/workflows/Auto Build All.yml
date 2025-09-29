@@ -197,14 +197,13 @@ jobs:
           git config user.email "actions@github.com"
           git checkout --orphan nightly
           git rm -rf .
-          Copy-Item "${{ github.workspace }}\MPC-BE.x64-installer.zip" .
-          Copy-Item "${{ github.workspace }}\MPC-BE.x86-installer.zip" .
-          Copy-Item "${{ github.workspace }}\MPC-BE.x64.7z" .
-          Copy-Item "${{ github.workspace }}\MPC-BE.x86.7z" .
-          Copy-Item "${{ github.workspace }}\standalone_filters-mpc-be.x64.7z" .
-          Copy-Item "${{ github.workspace }}\standalone_filters-mpc-be.x86.7z" .
-          Copy-Item "${{ github.workspace }}\MpcVideoRenderer.zip" .
-          git add .
+          git add MPC-BE.x64-installer.zip
+          git add MPC-BE.x86-installer.zip
+          git add MPC-BE.x64.7z
+          git add MPC-BE.x86.7z
+          git add standalone_filters-mpc-be.x64.7z
+          git add standalone_filters-mpc-be.x86.7z
+          git add MpcVideoRenderer.zip
           git commit -m "🤘🤘🤘🤘🤘🤘"
           git push -f origin nightly
 
