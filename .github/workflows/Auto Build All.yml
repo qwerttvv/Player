@@ -231,6 +231,7 @@ jobs:
 
       - name: Delete commit history - nightly
         run: |
+          git checkout nightly
           git checkout --orphan temp_branch
           git commit --allow-empty -m "🤘🤘🤘🤘🤘🤘"
           git branch -M nightly
