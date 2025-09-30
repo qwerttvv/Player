@@ -214,6 +214,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@main
+        with:
+          fetch-depth: 0
 
       - name: Setup Git
         run: |
@@ -231,6 +233,7 @@ jobs:
 
       - name: Delete commit history - nightly
         run: |
+          git fetch origin nightly:nightly
           git checkout nightly
           git checkout --orphan temp_branch
           git commit --allow-empty -m "🤘🤘🤘🤘🤘🤘"
