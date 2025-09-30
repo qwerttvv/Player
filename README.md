@@ -14,7 +14,7 @@ https://github.com/qwerttvv/Player/releases
 
 https://github.com/qwerttvv/Player/releases/latest
 
-or
+or direct link
 
 https://raw.githubusercontent.com/qwerttvv/Player/nightly/MPC-BE.x64.7z
 
