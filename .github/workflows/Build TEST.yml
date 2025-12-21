@@ -1,0 +1,93 @@
+name: Build TEST
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build with ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-2022
+          - windows-2025
+    
+    steps:
+
+      - name: Clone MPC-BE repository
+        shell: pwsh
+        run: |
+          git clone --recursive https://github.com/Aleksoid1978/MPC-BE.git C:\\repo\\MPC-BE
+
+      - name: Clone VideoRenderer repository
+        shell: pwsh
+        run: |
+          git clone --recursive https://github.com/Aleksoid1978/VideoRenderer.git C:\\repo\\VideoRenderer
+
+      - name: Set up MSYS
+        shell: pwsh
+        run: |
+          curl -sSL https://raw.githubusercontent.com/Aleksoid1978/MSYS/main/MSYS_MinGW-w64_GCC_1521_x86-x64.7z -o MSYS_MinGW-w64_GCC_1521_x86-x64.7z
+          7z x MSYS_MinGW-w64_GCC_1521_x86-x64.7z -oC:\\repo\\MSYS
+
+      - name: Create environments.bat
+        shell: pwsh
+        run: |
+          echo '@ECHO OFF' > C:\\repo\\MPC-BE\\environments.bat
+          echo 'SET "MPCBE_MSYS=C:\\repo\\MSYS"' >> C:\\repo\\MPC-BE\\environments.bat
+          echo 'SET "MPCBE_MINGW=C:\\repo\\MSYS\\mingw"' >> C:\\repo\\MPC-BE\\environments.bat
+
+      - name: Execute update_gcc.bat
+        shell: pwsh
+        run: |
+          cd C:\\repo\\MPC-BE
+          .\\update_gcc.bat
+
+      - name: Install InnoSetup - windows-2025
+        if: matrix.os == 'windows-2025'
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile C:\\repo\\is.exe
+          Start-Process -FilePath C:\\repo\\is.exe -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/SP-" -Wait
+
+      - name: Build VideoRenderer
+        shell: pwsh
+        run: |
+          cd C:\\repo\\VideoRenderer
+          .\\build_mpcvr.cmd NoWait
+
+      - name: Build MPC-BE
+        shell: pwsh
+        run: |
+          cd C:\\repo\\MPC-BE
+          .\\build.bat Clean All NoWait
+          .\\build.bat Build All Packages NoWait
+
+      - name: Upload MPC-BE logs to artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "MPC-BE.LOGS-${{ matrix.os }}"
+          path: C:/repo/MPC-BE/_bin/logs/
+          compression-level: 9
+
+      - name: Upload VideoRenderer logs to artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "MPC-VideoRenderer.LOGS-${{ matrix.os }}"
+          path: C:/repo/VideoRenderer/_bin/logs/
+          compression-level: 9
+
+      - name: Upload MPC-BE bin to artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "MPC-BE.BIN-${{ matrix.os }}"
+          path: C:/repo/MPC-BE/_bin/Packages/**/*.*
+          compression-level: 9
+
+      - name: Upload VideoRenderer bin to artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "MPC-VideoRenderer.BIN-${{ matrix.os }}"
+          path: C:/repo/VideoRenderer/_bin/MpcVideoRenderer*.zip
+          compression-level: 9
