@@ -105,11 +105,11 @@ jobs:
           echo "" >> "${{ github.workspace }}-nightly_builds_release_notes.txt"
           echo "Enjoy ：）" >> "${{ github.workspace }}-nightly_builds_release_notes.txt"
 
-      - name: Install InnoSetup
-        shell: pwsh
-        run: |
-          Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile C:\\repo\\is.exe
-          Start-Process -FilePath C:\\repo\\is.exe -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/SP-" -Wait
+      # - name: Install InnoSetup
+        # shell: pwsh
+        # run: |
+          # Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile C:\\repo\\is.exe
+          # Start-Process -FilePath C:\\repo\\is.exe -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/SP-" -Wait
 
       - name: Set up MSYS
         shell: pwsh
