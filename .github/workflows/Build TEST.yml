@@ -44,13 +44,6 @@ jobs:
           cd C:\\repo\\MPC-BE
           .\\update_gcc.bat
 
-      - name: Install InnoSetup - windows-2025
-        if: matrix.os == 'windows-2025'
-        shell: pwsh
-        run: |
-          Invoke-WebRequest -Uri https://jrsoftware.org/download.php/is.exe -OutFile C:\\repo\\is.exe
-          Start-Process -FilePath C:\\repo\\is.exe -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/SP-" -Wait
-
       - name: Build VideoRenderer
         shell: pwsh
         run: |
