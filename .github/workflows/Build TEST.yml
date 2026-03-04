@@ -61,27 +61,27 @@ jobs:
       - name: Upload MPC-BE logs to artifact
         uses: actions/upload-artifact@main
         with:
-          name: "MPC-BE.LOGS-${{ matrix.os }}"
+          name: "LOG.MPC-BE.${{ matrix.os }}"
           path: C:/repo/MPC-BE/_bin/logs/
           compression-level: 9
 
       - name: Upload VideoRenderer logs to artifact
         uses: actions/upload-artifact@main
         with:
-          name: "MPC-VideoRenderer.LOGS-${{ matrix.os }}"
+          name: "LOG.MPC-VideoRenderer.${{ matrix.os }}"
           path: C:/repo/VideoRenderer/_bin/logs/
           compression-level: 9
 
       - name: Upload MPC-BE bin to artifact
         uses: actions/upload-artifact@main
         with:
-          name: "MPC-BE.BIN-${{ matrix.os }}"
+          name: "BIN.MPC-BE.${{ matrix.os }}"
           path: C:/repo/MPC-BE/_bin/Packages/**/*.*
           compression-level: 9
 
       - name: Upload VideoRenderer bin to artifact
         uses: actions/upload-artifact@main
         with:
-          name: "MPC-VideoRenderer.BIN-${{ matrix.os }}"
+          name: "BIN.MPC-VideoRenderer.${{ matrix.os }}"
           path: C:/repo/VideoRenderer/_bin/MpcVideoRenderer*.zip
           compression-level: 9
