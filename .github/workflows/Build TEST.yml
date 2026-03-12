@@ -13,7 +13,7 @@ jobs:
           - windows-2022
           - windows-2025
           - windows-2025-vs2026
-    
+
     steps:
 
       - name: Clone MPC-BE repository
@@ -51,6 +51,20 @@ jobs:
           cd C:\\repo\\VideoRenderer
           .\\build_mpcvr.cmd NoWait
 
+      - name: Upload VideoRenderer logs to artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "LOG.MPC-VideoRenderer.${{ matrix.os }}"
+          path: C:/repo/VideoRenderer/_bin/logs/
+          compression-level: 9
+
+      - name: Upload VideoRenderer bin to artifact
+        uses: actions/upload-artifact@main
+        with:
+          name: "BIN.MPC-VideoRenderer.${{ matrix.os }}"
+          path: C:/repo/VideoRenderer/_bin/MpcVideoRenderer*.zip
+          compression-level: 9
+
       - name: Build MPC-BE
         shell: pwsh
         run: |
@@ -65,23 +79,9 @@ jobs:
           path: C:/repo/MPC-BE/_bin/logs/
           compression-level: 9
 
-      - name: Upload VideoRenderer logs to artifact
-        uses: actions/upload-artifact@main
-        with:
-          name: "LOG.MPC-VideoRenderer.${{ matrix.os }}"
-          path: C:/repo/VideoRenderer/_bin/logs/
-          compression-level: 9
-
       - name: Upload MPC-BE bin to artifact
         uses: actions/upload-artifact@main
         with:
           name: "BIN.MPC-BE.${{ matrix.os }}"
           path: C:/repo/MPC-BE/_bin/Packages/**/*.*
-          compression-level: 9
-
-      - name: Upload VideoRenderer bin to artifact
-        uses: actions/upload-artifact@main
-        with:
-          name: "BIN.MPC-VideoRenderer.${{ matrix.os }}"
-          path: C:/repo/VideoRenderer/_bin/MpcVideoRenderer*.zip
           compression-level: 9
