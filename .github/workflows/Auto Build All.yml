@@ -29,19 +29,19 @@ jobs:
       - name: Get MPC-BE commit SHA
         shell: bash
         run: |
-          MPCBE_COMMIT_SHA=$(curl -sSL https://api.github.com/repos/Aleksoid1978/MPC-BE/commits/master | jq -r '.sha')
+          MPCBE_COMMIT_SHA=$(curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/Aleksoid1978/MPC-BE/commits/master | jq -r '.sha')
           echo "MPCBE_COMMIT_SHA=$MPCBE_COMMIT_SHA" >> $GITHUB_ENV
 
       - name: Get VideoRenderer commit SHA
         shell: bash
         run: |
-          VIDEORENDERER_COMMIT_SHA=$(curl -sSL https://api.github.com/repos/Aleksoid1978/VideoRenderer/commits/master | jq -r '.sha')
+          VIDEORENDERER_COMMIT_SHA=$(curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/Aleksoid1978/VideoRenderer/commits/master | jq -r '.sha')
           echo "VIDEORENDERER_COMMIT_SHA=$VIDEORENDERER_COMMIT_SHA" >> $GITHUB_ENV
 
       - name: Get Player latest release SHAs
         shell: bash
         run: |
-          PLAYER_RELEASE_BODY=$(curl -sSL https://api.github.com/repos/qwerttvv/Player/releases/latest | jq -r '.body')
+          PLAYER_RELEASE_BODY=$(curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/qwerttvv/Player/releases/latest | jq -r '.body')
           MPCBE_RELEASE_SHA=$(echo "$PLAYER_RELEASE_BODY" | grep -oP 'https://github.com/Aleksoid1978/MPC-BE/commits/\K\w+')
           VIDEORENDERER_RELEASE_SHA=$(echo "$PLAYER_RELEASE_BODY" | grep -oP 'https://github.com/Aleksoid1978/VideoRenderer/commits/\K\w+')
           echo "MPCBE_RELEASE_SHA=$MPCBE_RELEASE_SHA" >> $GITHUB_ENV
