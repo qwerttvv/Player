@@ -1,5 +1,9 @@
 name: Auto Build All
 
+concurrency:
+  group: auto-build
+  cancel-in-progress: false
+
 on:
   workflow_dispatch:
     inputs:
@@ -8,7 +12,7 @@ on:
         required: false
         default: 'false'
   schedule:
-    - cron: '22 */2 * * *'
+    - cron: '11 */1 * * *'
 
 jobs:
   check-updates:
