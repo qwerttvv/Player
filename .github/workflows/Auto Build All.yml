@@ -29,23 +29,50 @@ jobs:
       - name: Get MPC-BE commit SHA
         shell: bash
         run: |
-          MPCBE_COMMIT_SHA=$(curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/Aleksoid1978/MPC-BE/commits/master | jq -r '.sha')
-          echo "MPCBE_COMMIT_SHA=$MPCBE_COMMIT_SHA" >> $GITHUB_ENV
+          while true; do
+            MPCBE_COMMIT_SHA=$(curl -fsSL --connect-timeout 11 --max-time 33 -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/Aleksoid1978/MPC-BE/commits/master | jq -r '.sha' || true)
+            if [[ $MPCBE_COMMIT_SHA =~ ^[0-9a-fA-F]{40}$ ]]; then
+              echo "MPCBE_COMMIT_SHA=$MPCBE_COMMIT_SHA" >> $GITHUB_ENV
+              echo "Success: MPCBE_COMMIT_SHA=$MPCBE_COMMIT_SHA"
+              break
+            else
+              echo "Invalid or empty SHA received: '$MPCBE_COMMIT_SHA'. Retrying in 6 seconds..."
+              sleep 6
+            fi
+          done
 
       - name: Get VideoRenderer commit SHA
         shell: bash
         run: |
-          VIDEORENDERER_COMMIT_SHA=$(curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/Aleksoid1978/VideoRenderer/commits/master | jq -r '.sha')
-          echo "VIDEORENDERER_COMMIT_SHA=$VIDEORENDERER_COMMIT_SHA" >> $GITHUB_ENV
+          while true; do
+            VIDEORENDERER_COMMIT_SHA=$(curl -fsSL --connect-timeout 11 --max-time 33 -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/Aleksoid1978/VideoRenderer/commits/master | jq -r '.sha' || true)
+            if [[ $VIDEORENDERER_COMMIT_SHA =~ ^[0-9a-fA-F]{40}$ ]]; then
+              echo "VIDEORENDERER_COMMIT_SHA=$VIDEORENDERER_COMMIT_SHA" >> $GITHUB_ENV
+              echo "Success: VIDEORENDERER_COMMIT_SHA=$VIDEORENDERER_COMMIT_SHA"
+              break
+            else
+              echo "Invalid or empty SHA received: '$VIDEORENDERER_COMMIT_SHA'. Retrying in 6 seconds..."
+              sleep 6
+            fi
+          done
 
       - name: Get Player latest release SHAs
         shell: bash
         run: |
-          PLAYER_RELEASE_BODY=$(curl -sSL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/qwerttvv/Player/releases/latest | jq -r '.body')
-          MPCBE_RELEASE_SHA=$(echo "$PLAYER_RELEASE_BODY" | grep -oP 'https://github.com/Aleksoid1978/MPC-BE/commits/\K\w+')
-          VIDEORENDERER_RELEASE_SHA=$(echo "$PLAYER_RELEASE_BODY" | grep -oP 'https://github.com/Aleksoid1978/VideoRenderer/commits/\K\w+')
-          echo "MPCBE_RELEASE_SHA=$MPCBE_RELEASE_SHA" >> $GITHUB_ENV
-          echo "VIDEORENDERER_RELEASE_SHA=$VIDEORENDERER_RELEASE_SHA" >> $GITHUB_ENV
+          while true; do
+            PLAYER_RELEASE_BODY=$(curl -fsSL --connect-timeout 11 --max-time 33 -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/qwerttvv/Player/releases/latest | jq -r '.body' || true)
+            MPCBE_RELEASE_SHA=$(echo "$PLAYER_RELEASE_BODY" | grep -oP 'https://github.com/Aleksoid1978/MPC-BE/commits/\K[0-9a-fA-F]{40}' || true)
+            VIDEORENDERER_RELEASE_SHA=$(echo "$PLAYER_RELEASE_BODY" | grep -oP 'https://github.com/Aleksoid1978/VideoRenderer/commits/\K[0-9a-fA-F]{40}' || true)
+            if [[ $MPCBE_RELEASE_SHA =~ ^[0-9a-fA-F]{40}$ ]] && [[ $VIDEORENDERER_RELEASE_SHA =~ ^[0-9a-fA-F]{40}$ ]]; then
+              echo "MPCBE_RELEASE_SHA=$MPCBE_RELEASE_SHA" >> $GITHUB_ENV
+              echo "VIDEORENDERER_RELEASE_SHA=$VIDEORENDERER_RELEASE_SHA" >> $GITHUB_ENV
+              echo "Success: MPCBE_RELEASE_SHA=$MPCBE_RELEASE_SHA, VIDEORENDERER_RELEASE_SHA=$VIDEORENDERER_RELEASE_SHA"
+              break
+            else
+              echo "Invalid or missing release SHAs. Retrying in 6 seconds..."
+              sleep 6
+            fi
+          done
 
       - name: Compare Commit SHAs and Release SHAs
         id: compare_shas
